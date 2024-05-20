@@ -37,7 +37,7 @@ int main(){
         send(socket,response.c_str(),response.length(),0);
         close(socket);
     });
-
+    server.watch_and_reload("main.cpp");
     server.start();
 
     return 0;
