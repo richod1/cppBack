@@ -68,9 +68,31 @@ public:
             close(server_fd);
             exit(EXIT_FAILURE);
         }
-    }
+    
 
     std::string request=read_request(new_socket);
+    std::map<std::string,std::string> headers=parse_headers(request);
+    std::string method,path;
+    parse_request_line(request,method,path);
+    std::string body=get_request_body(request);
+
+
+    for(const auto &middleware:middlewares){
+        middleware(new_socket,headers,body);
+    }
+
+    if(method == "GET" && getRoutes.find(path) != getRoutes.end()){
+        getRoutes[path](new_socket,headers,body);
+    }else if(method=="POST" && postRoutes.find(path) != postRoutes.end()){
+        postRoutes[path](new_socket,headers,body);
+    }else{
+        std::string response ="HTTP/1.1 404 NOT FOUND \nContent-Type:text/plain\nContent-Length: 9\n\nNot Found";
+        send(new_socket,response.c_str(),response.length(),0);
+        close(new_socket);
+        }
+    }
+
+    close(server_fd);
     }
 
     private:
@@ -100,5 +122,20 @@ public:
             }
             return headers;
 
+        }
+
+        // parse request function
+        void parse_request_line(const std::string &request, std::string &method,std::string &path){
+            std::istringstream request_stream(request);
+            request_stream>>method>>path;
+        }
+
+        // function for getting body request
+        std::string get_request_body(const std::string &request){
+            size_t pos=request.find("\r\n\r\n");
+            if(pos !=std::string::npos){
+                return request.substr(pos + 4);
+            }
+            return "";
         }
 };
