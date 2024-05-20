@@ -61,6 +61,16 @@ public:
 
         std::cout<<"Server is listening port :"<<port<<std::endl;
 
+
+    while(true){
+        if((new_socket=accept(server_fd, (struct sockaddr *)&address,(socklen_t*)&addrlen)) < 0){
+            perror("accept");
+            close(server_fd);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    std::string request=read_request(new_socket);
     }
 
     private:
@@ -68,4 +78,12 @@ public:
         std::vector<Handler> middlewares;
         std::map<std::string, Handler>  getRoutes;
         std::map<std::string, Handler> postRoutes;
+
+
+        // function for reading request
+        std::string read_request(int socket){
+            char buffer[2048]={0};
+            read(socket,buffer,2048);
+            return std::string(buffer);
+        }
 };
