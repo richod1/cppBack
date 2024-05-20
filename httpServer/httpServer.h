@@ -86,4 +86,19 @@ public:
             read(socket,buffer,2048);
             return std::string(buffer);
         }
+
+        std::map<std::string,std::string> parse_headers(const std::string &request){
+            std::map<std::string,std::string> headers;
+            std::istringstream request_stream(request);
+            std::string line;
+
+            while(std::getline(request_stream,line) && line != "\r"){
+                size_t pos=line.find(": ");
+                if(pos != std::string::npos){
+                    headers[line.substr(0,pos)]=line.substr(pos + 2,line.length()-pos-3);
+                }
+            }
+            return headers;
+
+        }
 };
