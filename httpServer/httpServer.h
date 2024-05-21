@@ -49,7 +49,7 @@ public:
 
                 // recompile the server
 
-                std::string compile_command= "g++ -o http_server " + source_file +" -std=c++13";
+                std::string compile_command= "g++ -o httpServer " + source_file +" -std=c++11";
                 system(compile_command.c_str());
 
                 // Restart the server
