@@ -1,0 +1,9 @@
+POST http://localhost:3000/data
+
+{
+    "name":"degraft"
+}
+
+#######
+GET http://localhost:3000/api
+Content-Type: text/plain
