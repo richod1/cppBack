@@ -10,7 +10,7 @@
 #include <thread>
 #include <sys/wait.h>
 #include <csignal>
-#include <json/json.hpp> 
+#include "json.hpp" 
 
 #define PORT 3000
 
@@ -123,8 +123,16 @@ private:
             std::string method, path;
             parse_request_line(request, method, path);
             json body;
-            if (!headers["Content-Type"].compare("application/json")) {
-                body = json::parse(get_request_body(request));
+            if (headers["Content-Type"] == "application/json") {
+                try {
+                    body = json::parse(get_request_body(request));
+                } catch (json::parse_error& e) {
+                    std::cerr << "JSON parse error: " << e.what() << std::endl;
+                    std::string response = "HTTP/1.1 400 Bad Request\nContent-Type: application/json\nContent-Length: 24\n\n{\"error\": \"Invalid JSON\"}";
+                    send(new_socket, response.c_str(), response.length(), 0);
+                    close(new_socket);
+                    continue;
+                }
             }
 
             for (const auto &middleware : middlewares) {
